@@ -1,9 +1,13 @@
 import BaseHTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 import sys
+import os
 import base64
+import ssl
+import SocketServer
 
 key = ""
+CERTFILE_PATH = "/root/server.pem"
 
 class AuthHandler(SimpleHTTPRequestHandler):
     ''' Main class to present webpages and authentication. '''
@@ -36,14 +40,26 @@ class AuthHandler(SimpleHTTPRequestHandler):
             self.wfile.write('not authenticated')
             pass
 
-def test(HandlerClass = AuthHandler,
+def serve_https(https_port=80, HandlerClass = AuthHandler,
          ServerClass = BaseHTTPServer.HTTPServer):
-    BaseHTTPServer.test(HandlerClass, ServerClass)
+    httpd = SocketServer.TCPServer(("", PORT), HandlerClass)
+    httpd.socket = ssl.wrap_socket (httpd.socket, certfile=CERTFILE_PATH, server_side=True)
 
-
+    sa = httpd.socket.getsockname()
+    print "Serving HTTP on", sa[0], "port", sa[1], "..."
+    httpd.serve_forever()
+	
 if __name__ == '__main__':
     if len(sys.argv)<3:
         print "usage SimpleAuthServer.py [port] [username:password]"
         sys.exit()
-    key = base64.b64encode(sys.argv[2])
-    test()
+
+	https_port = int(sys.argv[1])
+	key = base64.b64encode(sys.argv[2])
+
+	if len(sys.argv) == 4:
+		change_dir = sys.argv[3]
+		print "Changing dir to {cd}".format(cd=change_dir)
+		os.chdir(change_dir)
+    
+    serve_https(https_port)
