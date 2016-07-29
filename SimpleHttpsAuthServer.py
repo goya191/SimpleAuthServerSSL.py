@@ -48,7 +48,7 @@ def serve_https(https_port=80, HandlerClass = AuthHandler,
     sa = httpd.socket.getsockname()
     print "Serving HTTP on", sa[0], "port", sa[1], "..."
     httpd.serve_forever()
-	
+
 if __name__ == '__main__':
     if len(sys.argv)<3:
         print "usage SimpleAuthServer.py [port] [username:password]"
@@ -61,5 +61,6 @@ if __name__ == '__main__':
 		change_dir = sys.argv[3]
 		print "Changing dir to {cd}".format(cd=change_dir)
 		os.chdir(change_dir)
-    
+
     serve_https(https_port)
+
